@@ -70,7 +70,8 @@
               "buildTarget": "adelanto_ingresos_web:build:production"
             },
             "development": {
-              "buildTarget": "adelanto_ingresos_web:build:development"
+              "buildTarget": "adelanto_ingresos_web:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

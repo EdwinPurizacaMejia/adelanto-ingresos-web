@@ -1,0 +1,282 @@
+// ============ NAVBAR GENERAL ============
+.navbar {
+  background: linear-gradient(135deg, #004aad 0%, #003d8f 100%);
+  color: white;
+  padding: 16px 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo span {
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
+
+// ============ MENU PRINCIPAL ============
+.menu {
+  list-style: none;
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+
+  li {
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -4px;
+      width: 1px;
+      height: 20px;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+// ============ LINKS DE NAVEGACIÓN ============
+.menu-link {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+
+  .icon {
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  span:last-child {
+    letter-spacing: 0.3px;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ============ SECCIÓN DE USUARIO ============
+.user-section {
+  margin-left: 8px;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    .username {
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+    }
+
+    .role {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+// ============ BOTÓN LOGOUT ============
+.logout-btn {
+  background-color: rgba(220, 53, 69, 0.15);
+  border: 1.5px solid #dc3545;
+  border-radius: 6px;
+  color: white;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+
+  .icon {
+    font-size: 16px;
+  }
+
+  &:hover {
+    background-color: #dc3545;
+    border-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+// ============ MENU LOGIN (cuando no está autenticado) ============
+.login-menu {
+  list-style: none;
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+
+  li a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+  }
+}
+
+// ============ RESPONSIVE DESIGN ============
+@media (max-width: 768px) {
+  .navbar {
+    padding: 12px 16px;
+  }
+
+  .navbar-container {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .logo span {
+    font-size: 18px;
+  }
+
+  .menu {
+    gap: 4px;
+    width: 100%;
+    flex-wrap: wrap;
+
+    li:not(:last-child)::after {
+      display: none;
+    }
+  }
+
+  .menu-link {
+    padding: 6px 10px;
+    font-size: 12px;
+
+    .icon {
+      font-size: 16px;
+    }
+  }
+
+  .user-section {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    .user-info {
+      flex-direction: row;
+      gap: 4px;
+      align-items: center;
+
+      .username {
+        font-size: 12px;
+      }
+
+      .role {
+        font-size: 10px;
+      }
+    }
+  }
+
+  .logout-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+
+    .icon {
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 10px 12px;
+  }
+
+  .logo span {
+    font-size: 16px;
+  }
+
+  .menu {
+    gap: 2px;
+  }
+
+  .menu-link {
+    padding: 4px 8px;
+    font-size: 11px;
+
+    .icon {
+      font-size: 14px;
+    }
+
+    span:last-child {
+      display: none;
+    }
+  }
+
+  .user-section {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .logout-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+
+    span:last-child {
+      display: none;
+    }
+  }
+}

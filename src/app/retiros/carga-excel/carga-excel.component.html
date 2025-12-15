@@ -1,0 +1,91 @@
+<div class="carga-excel-container">
+  <div class="page-header">
+    <h1>Carga de Archivo Excel</h1>
+    <p class="subtitle">Sube un archivo .xlsx para cargar la disponibilidad de retiros</p>
+  </div>
+
+  <div class="upload-section">
+    <div class="upload-card">
+      <h2>Seleccionar Archivo</h2>
+      
+      <div
+        class="dropzone"
+        [class.dragover]="isDragOver"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        tabindex="0"
+        role="button"
+        aria-label="Área de arrastrar y soltar archivo"
+      >
+        <input #fileInput type="file" accept=".xlsx,.xls" (change)="onFileSelected($event)" hidden />
+        
+        <div class="drop-content" (click)="fileInput.click()">
+          <svg class="upload-icon" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-width="2" opacity="0.1"/>
+            <path d="M32 20v20" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <path d="M24 28l8-8 8 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 44h24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+
+          <div *ngIf="!selectedFile" class="drop-text">
+            <strong>Arrastra y suelta el archivo aquí</strong>
+            <span>o haz clic para seleccionar un archivo .xlsx o .xls</span>
+            <span class="file-limit">Tamaño máximo: 10 MB</span>
+          </div>
+
+          <div *ngIf="selectedFile" class="file-selected">
+            <svg class="file-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+              <path d="M14 2v6h6" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            </svg>
+            <div class="file-details">
+              <div class="file-name">{{ selectedFile.name }}</div>
+              <div class="file-size">{{ formatBytes(selectedFile.size) }}</div>
+            </div>
+            <button class="btn-remove" (click)="removeSelected(); $event.stopPropagation()" type="button" title="Eliminar archivo">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="uploading" class="progress-section">
+        <div class="progress-bar-container">
+          <div class="progress-bar" [style.width.%]="progress"></div>
+        </div>
+        <div class="progress-text">Subiendo... {{ progress }}%</div>
+      </div>
+
+      <div class="button-group">
+        <button 
+          class="btn btn-primary" 
+          (click)="uploadFile()" 
+          [disabled]="!selectedFile || uploading">
+          <span *ngIf="!uploading">Subir Archivo</span>
+          <span *ngIf="uploading">Subiendo...</span>
+        </button>
+        <button 
+          class="btn btn-secondary" 
+          (click)="reset()"
+          [disabled]="uploading"
+          *ngIf="selectedFile || message">
+          Limpiar
+        </button>
+      </div>
+
+      <div *ngIf="message" class="alert" [ngClass]="{'alert-success': messageType === 'success', 'alert-error': messageType === 'error'}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" *ngIf="messageType === 'error'"/>
+          <path d="M12 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" *ngIf="messageType === 'error'"/>
+          <circle cx="12" cy="16" r="1" fill="currentColor" *ngIf="messageType === 'error'"/>
+          <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" *ngIf="messageType === 'success'"/>
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" *ngIf="messageType === 'success'"/>
+        </svg>
+        <span>{{ message }}</span>
+      </div>
+    </div>
+  </div>
+</div>

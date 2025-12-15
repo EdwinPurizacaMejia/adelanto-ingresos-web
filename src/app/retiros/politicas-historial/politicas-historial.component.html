@@ -1,0 +1,107 @@
+<div class="politicas-historial-container">
+  <div class="page-header">
+    <h1>Log de Políticas de Aceptación</h1>
+    <p class="subtitle">Consulta el historial de políticas de aceptación por documento</p>
+  </div>
+
+  <div class="search-section">
+    <div class="search-card">
+      <h2>Consultar Historial</h2>
+      
+      <div class="form-group">
+        <label for="tipoDocumento">Tipo de Documento</label>
+        <select 
+          id="tipoDocumento" 
+          [(ngModel)]="tipoDocumento" 
+          class="form-control"
+          [disabled]="loading">
+          <option *ngFor="let tipo of tiposDocumento" [value]="tipo.value">
+            {{ tipo.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="numeroDocumento">Número de Documento</label>
+        <input 
+          type="text" 
+          id="numeroDocumento" 
+          [(ngModel)]="numeroDocumento" 
+          class="form-control"
+          placeholder="Ingrese el número de documento"
+          [disabled]="loading"
+          (keyup.enter)="consultarHistorial()">
+      </div>
+
+      <div class="button-group">
+        <button 
+          class="btn btn-primary" 
+          (click)="consultarHistorial()"
+          [disabled]="loading || !numeroDocumento.trim()">
+          <span *ngIf="!loading">Consultar Historial</span>
+          <span *ngIf="loading">Consultando...</span>
+        </button>
+        <button 
+          class="btn btn-secondary" 
+          (click)="limpiar()"
+          [disabled]="loading">
+          Limpiar
+        </button>
+      </div>
+
+      <div *ngIf="error" class="alert alert-error">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="16" r="1" fill="currentColor"/>
+        </svg>
+        <span>{{ error }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-section" *ngIf="historial.length > 0">
+    <div class="results-header">
+      <h2>Resultados</h2>
+      <span class="results-count">{{ historial.length }} registro(s) encontrado(s)</span>
+    </div>
+
+    <div class="table-container">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Log ID</th>
+            <th>Fecha/Hora</th>
+            <th>Versión Política</th>
+            <th>IP Address</th>
+            <th>User Agent</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of historial">
+            <td>{{ item.log_id }}</td>
+            <td>{{ item.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td>{{ item.version_politica }}</td>
+            <td>{{ item.ip_address || 'N/A' }}</td>
+            <td>{{ item.user_agent || 'N/A' }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="{'status-success': item.accepted, 'status-error': !item.accepted}">
+                {{ item.accepted ? 'Aceptado' : 'Rechazado' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && historial.length === 0 && !error">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h3>Consulta el historial</h3>
+    <p>Selecciona el tipo de documento e ingresa el número para consultar el historial de políticas de aceptación</p>
+  </div>
+</div>
