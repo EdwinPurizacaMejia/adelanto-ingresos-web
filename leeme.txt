@@ -1,0 +1,12 @@
+
+# 1. Primero haz build de producción
+ng build --configuration production --base-href "https://github.com/EdwinPurizacaMejia/adelanto-ingresos-web"
+
+# 2. Desplegar a GitHub Pages
+npx angular-cli-ghpages --dir=dist/adelanto_ingresos_web
+
+# 3. Si te pide token de GitHub, usa este comando:
+npx angular-cli-ghpages --dir=dist/adelanto_ingresos_web --branch=gh-pages --repo=https://github.com/EdwinPurizacaMejia/adelanto-ingresos-web.git --name="Edwin Purizaca" --email=edwin.purizaca@gmail.com
+
+# ver web publicada
+https://edwinpurizacamejia.github.io/adelanto-ingresos-web/

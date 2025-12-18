@@ -1,0 +1,7 @@
+{
+  "root": "dist/adelanto_ingresos_web/",
+  "clean_urls": false,
+  "routes": {
+    "/**": "index.html"
+  }
+}

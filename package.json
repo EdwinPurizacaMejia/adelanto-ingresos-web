@@ -7,7 +7,13 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:adelanto_ingresos_web": "node dist/adelanto_ingresos_web/server/server.mjs"
+    "serve:ssr:adelanto_ingresos_web": "node dist/adelanto_ingresos_web/server/server.mjs",
+    "build:github": "ng build --configuration github-pages",
+    "predeploy": "npm run build:github",
+    "deploy": "npx angular-cli-ghpages --dir=dist/adelanto_ingresos_web/browser",
+    "deploy:quick": "npm run build:github && npx angular-cli-ghpages --dir=dist/adelanto_ingresos_web/browser",
+    "deploy:force": "ng build --configuration github-pages && npx angular-cli-ghpages --dir=dist/adelanto_ingresos_web/browser --repo=https://github.com/TU_USUARIO/adelanto-ingresos-web.git --branch=gh-pages --name=\"Tu Nombre\" --email=tu@email.com",
+    "deploy:all": "npm run build:github && npx angular-cli-ghpages --dir=dist/adelanto_ingresos_web/browser --no-silent"
   },
   "private": true,
   "dependencies": {
@@ -36,6 +42,7 @@
     "@types/express": "^4.17.17",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^18.18.0",
+    "angular-cli-ghpages": "^2.0.3",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
