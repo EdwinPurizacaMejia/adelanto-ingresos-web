@@ -59,50 +59,72 @@ git push origin master
 
 ---
 
-## Publicar en GitHub Pages (Opcional)
+## Publicar en GitHub Pages
 
-Si deseas que tu aplicación esté disponible públicamente en GitHub Pages:
+Ya tienes GitHub Pages configurado con la rama `gh-pages`. Aquí están las opciones para actualizar tu sitio:
 
-### 1. Instalar angular-cli-ghpages (si no está instalado)
+### Opción 1: Usar el Script Automatizado (Recomendado)
+
+He creado un script que hace todo el proceso automáticamente:
 
 ```bash
-npm install -g angular-cli-ghpages
+# Dar permisos de ejecución al script
+chmod +x deploy-to-github-pages.sh
+
+# Ejecutar el script
+./deploy-to-github-pages.sh
 ```
 
-### 2. Construir el proyecto para producción
+El script hace lo siguiente:
+
+1. ✅ Guarda todos los cambios en tu rama actual
+2. ✅ Sube los cambios a GitHub
+3. ✅ Construye el proyecto para producción
+4. ✅ Despliega automáticamente a la rama gh-pages
+5. ✅ Te muestra la URL donde estará disponible tu sitio
+
+### Opción 2: Proceso Manual
+
+Si prefieres hacerlo paso a paso:
+
+#### 1. Construir el proyecto para producción
 
 ```bash
-# Construir con la base href correcta para GitHub Pages
 ng build --configuration production --base-href "/adelanto-ingresos-web/"
 ```
 
-### 3. Publicar en GitHub Pages
+#### 2. Navegar al directorio de build correcto
 
 ```bash
-# Usando angular-cli-ghpages
-npx angular-cli-ghpages --dir=dist/adelanto_ingresos_web/browser
+# IMPORTANTE: Nota que hay dos carpetas "browser"
+cd dist/adelanto_ingresos_web/browser/browser
 ```
 
-O manualmente:
+#### 3. Inicializar git y hacer commit
 
 ```bash
-# Crear/actualizar rama gh-pages
-git checkout -b gh-pages
-git add dist/adelanto_ingresos_web/browser -f
+git init
+git add -A
 git commit -m "Deploy to GitHub Pages"
-git subtree push --prefix dist/adelanto_ingresos_web/browser origin gh-pages
 ```
 
-### 4. Activar GitHub Pages en el repositorio
+#### 4. Hacer push a la rama gh-pages
 
-1. Ve a tu repositorio en GitHub
-2. Click en **Settings**
-3. En el menú lateral, click en **Pages**
-4. En **Source**, selecciona la rama `gh-pages`
-5. Click en **Save**
+```bash
+git push -f https://github.com/EdwinPurizacaMejia/adelanto-ingresos-web.git main:gh-pages
+```
 
-Tu aplicación estará disponible en:
-`https://edwinpurizacamejia.github.io/adelanto-ingresos-web/`
+#### 5. Volver al directorio raíz
+
+```bash
+cd ../../..
+```
+
+### Tu sitio está disponible en:
+
+🌐 **https://edwinpurizacamejia.github.io/adelanto-ingresos-web/**
+
+**Nota**: Después de hacer el deploy, puede tomar entre 1-5 minutos para que los cambios se reflejen en el sitio publicado.
 
 ---
 
