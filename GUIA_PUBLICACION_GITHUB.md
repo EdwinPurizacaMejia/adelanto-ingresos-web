@@ -111,7 +111,7 @@ git commit -m "Deploy to GitHub Pages"
 #### 4. Hacer push a la rama gh-pages
 
 ```bash
-git push -f https://github.com/EdwinPurizacaMejia/adelanto-ingresos-web.git main:gh-pages
+git push -f https://github.com/EdwinPurizacaMejia/adelanto-ingresos-web.git HEAD:gh-pages
 ```
 
 #### 5. Volver al directorio raíz

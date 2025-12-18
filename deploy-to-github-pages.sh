@@ -50,7 +50,7 @@ git commit -m "Deploy to GitHub Pages - $(date '+%Y-%m-%d %H:%M:%S')"
 
 # 7. Forzar push a la rama gh-pages
 echo -e "${YELLOW}🚀 Desplegando a GitHub Pages...${NC}"
-git push -f https://github.com/EdwinPurizacaMejia/adelanto-ingresos-web.git main:gh-pages
+git push -f https://github.com/EdwinPurizacaMejia/adelanto-ingresos-web.git HEAD:gh-pages
 
 if [ $? -eq 0 ]; then
     echo ""

@@ -44,7 +44,7 @@ cd dist/adelanto_ingresos_web/browser/browser
 git init
 git add -A
 git commit -m "Deploy"
-git push -f https://github.com/EdwinPurizacaMejia/adelanto-ingresos-web.git main:gh-pages
+git push -f https://github.com/EdwinPurizacaMejia/adelanto-ingresos-web.git HEAD:gh-pages
 
 # Volver al directorio raíz
 cd ../../../..
