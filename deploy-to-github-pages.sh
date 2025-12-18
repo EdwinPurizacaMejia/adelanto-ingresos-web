@@ -30,7 +30,7 @@ echo ""
 
 # 4. Construir el proyecto para producción
 echo -e "${YELLOW}🏗️  Construyendo proyecto para producción...${NC}"
-ng build --configuration production --base-href "/adelanto-ingresos-web/"
+ng build --configuration production
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Error al construir el proyecto${NC}"
@@ -41,7 +41,7 @@ echo ""
 
 # 5. Navegar al directorio de build correcto
 echo -e "${YELLOW}📂 Preparando archivos para deploy...${NC}"
-cd dist/adelanto_ingresos_web/browser/browser
+cd dist/adelanto_ingresos_web/browser
 
 # 6. Inicializar git en el directorio de build
 git init
