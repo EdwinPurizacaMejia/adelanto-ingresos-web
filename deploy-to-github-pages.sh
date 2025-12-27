@@ -43,6 +43,15 @@ echo ""
 echo -e "${YELLOW}📂 Preparando archivos para deploy...${NC}"
 cd dist/adelanto_ingresos_web/browser
 
+# 5.1 Verificar que el 404.html esté presente
+if [ ! -f "404.html" ]; then
+    echo -e "${RED}❌ Error: 404.html no se encuentra en el build${NC}"
+    echo -e "${YELLOW}Copiando 404.html manualmente...${NC}"
+    cp ../../../404.html .
+fi
+echo -e "${GREEN}✅ Archivo 404.html verificado${NC}"
+echo ""
+
 # 6. Inicializar git en el directorio de build
 git init
 git add -A
