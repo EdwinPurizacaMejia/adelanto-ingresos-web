@@ -6,5 +6,10 @@ export const AUTH_ROUTES: Routes = [
     path: 'login',
     component: LoginComponent,
     title: 'Login - Empresa Administradora'
+  },
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
   }
 ];
