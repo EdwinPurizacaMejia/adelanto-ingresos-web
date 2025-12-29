@@ -90,51 +90,115 @@ export class CargaExcelComponent {
     this.uploading = false;
   }
 
-  uploadFile() {
+  private async convertFileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remover el prefijo "data:...;base64,"
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = error => reject(error);
+    });
+  }
+
+  async uploadFile() {
     if (!this.selectedFile || this.uploading) return;
-
-    const formData = new FormData();
-    // Asegurar que el archivo se agregue correctamente con su nombre original
-    formData.append('file', this.selectedFile, this.selectedFile.name);
-
-    // Use AuthService.getToken() (safe) instead of direct localStorage access
-    const token = this.authService.getToken();
-    // No establecer Content-Type manualmente para FormData, el navegador lo hace automáticamente
-    const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
 
     this.uploading = true;
     this.progress = 0;
     this.message = '';
     this.messageType = '';
 
-    console.log('Subiendo archivo:', this.selectedFile.name, 'Tamaño:', this.selectedFile.size, 'bytes');
-    console.log('URL de destino:', this.uploadUrl);
+    try {
+      console.log('Subiendo archivo:', this.selectedFile.name, 'Tamaño:', this.selectedFile.size, 'bytes');
+      console.log('URL de destino:', this.uploadUrl);
 
-    this.http.post(this.uploadUrl, formData, {
-      headers,
-      reportProgress: true,
-      observe: 'events'
-    }).subscribe({
-      next: (event: HttpEvent<any>) => {
-        if (event.type === HttpEventType.UploadProgress && event.total) {
-          this.progress = Math.round((100 * event.loaded) / event.total);
-        } else if (event.type === HttpEventType.Response) {
-          this.uploading = false;
-          this.progress = 100;
-          this.message = 'Archivo cargado con éxito';
-          this.messageType = 'success';
-          setTimeout(() => this.removeSelected(), 1200);
+      // Intentar primero con FormData (método tradicional)
+      const formData = new FormData();
+      formData.append('file', this.selectedFile, this.selectedFile.name);
+
+      const token = this.authService.getToken();
+      const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+
+      this.http.post(this.uploadUrl, formData, {
+        headers,
+        reportProgress: true,
+        observe: 'events'
+      }).subscribe({
+        next: (event: HttpEvent<any>) => {
+          if (event.type === HttpEventType.UploadProgress && event.total) {
+            this.progress = Math.round((100 * event.loaded) / event.total);
+          } else if (event.type === HttpEventType.Response) {
+            this.uploading = false;
+            this.progress = 100;
+            this.message = 'Archivo cargado con éxito';
+            this.messageType = 'success';
+            setTimeout(() => this.removeSelected(), 1200);
+          }
+        },
+        error: async (err) => {
+          console.error('Error con FormData:', err);
+          
+          // Si falla con FormData, intentar con base64
+          if (err.status === 400 && err.error?.detail?.includes('seek')) {
+            console.log('Intentando envío alternativo con base64...');
+            try {
+              const base64Content = await this.convertFileToBase64(this.selectedFile!);
+              
+              const payload = {
+                filename: this.selectedFile!.name,
+                content: base64Content,
+                content_type: this.selectedFile!.type
+              };
+
+              const jsonHeaders = new HttpHeaders({
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+              });
+
+              this.http.post(this.uploadUrl, payload, { headers: jsonHeaders }).subscribe({
+                next: (response) => {
+                  this.uploading = false;
+                  this.progress = 100;
+                  this.message = 'Archivo cargado con éxito';
+                  this.messageType = 'success';
+                  setTimeout(() => this.removeSelected(), 1200);
+                },
+                error: (base64Error) => {
+                  this.uploading = false;
+                  this.progress = 0;
+                  this.messageType = 'error';
+                  const detail = base64Error?.error?.detail || base64Error?.message || 'Error desconocido';
+                  this.message = `Error al subir archivo: ${detail}`;
+                  console.error('Error con base64:', base64Error);
+                }
+              });
+            } catch (conversionError) {
+              this.uploading = false;
+              this.progress = 0;
+              this.messageType = 'error';
+              this.message = 'Error al procesar el archivo';
+              console.error('Error al convertir archivo:', conversionError);
+            }
+          } else {
+            this.uploading = false;
+            this.progress = 0;
+            this.messageType = 'error';
+            const detail = err?.error?.detail || err?.message || 'Error desconocido';
+            this.message = `Error al subir archivo: ${detail}`;
+          }
         }
-      },
-      error: (err) => {
-        this.uploading = false;
-        this.progress = 0;
-        this.messageType = 'error';
-        const detail = err?.error?.detail || err?.message || 'Error desconocido';
-        this.message = `Error al subir archivo: ${detail}`;
-        console.error('Error completo:', err);
-      }
-    });
+      });
+    } catch (error) {
+      this.uploading = false;
+      this.progress = 0;
+      this.messageType = 'error';
+      this.message = 'Error al preparar el archivo para subir';
+      console.error('Error inesperado:', error);
+    }
   }
 
   formatBytes(bytes: number) {
