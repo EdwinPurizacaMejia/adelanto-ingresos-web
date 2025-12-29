@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule, HttpEvent, HttpEventType, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -108,96 +108,61 @@ export class CargaExcelComponent {
     if (!this.selectedFile || this.uploading) return;
 
     this.uploading = true;
-    this.progress = 0;
-    this.message = '';
+    this.progress = 33;
+    this.message = 'Preparando archivo...';
     this.messageType = '';
 
     try {
       console.log('Subiendo archivo:', this.selectedFile.name, 'Tamaño:', this.selectedFile.size, 'bytes');
       console.log('URL de destino:', this.uploadUrl);
 
-      // Intentar primero con FormData (método tradicional)
-      const formData = new FormData();
-      formData.append('file', this.selectedFile, this.selectedFile.name);
+      // Convertir el archivo a base64
+      this.message = 'Convirtiendo archivo...';
+      this.progress = 50;
+      const base64Content = await this.convertFileToBase64(this.selectedFile);
+      
+      console.log('Archivo convertido a base64, longitud:', base64Content.length);
+
+      // Preparar el payload con el archivo en base64
+      const payload = {
+        filename: this.selectedFile.name,
+        content: base64Content,
+        content_type: this.selectedFile.type || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      };
 
       const token = this.authService.getToken();
-      const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      });
 
-      this.http.post(this.uploadUrl, formData, {
-        headers,
-        reportProgress: true,
-        observe: 'events'
-      }).subscribe({
-        next: (event: HttpEvent<any>) => {
-          if (event.type === HttpEventType.UploadProgress && event.total) {
-            this.progress = Math.round((100 * event.loaded) / event.total);
-          } else if (event.type === HttpEventType.Response) {
-            this.uploading = false;
-            this.progress = 100;
-            this.message = 'Archivo cargado con éxito';
-            this.messageType = 'success';
-            setTimeout(() => this.removeSelected(), 1200);
-          }
+      this.message = 'Enviando archivo...';
+      this.progress = 75;
+
+      this.http.post(this.uploadUrl, payload, { headers }).subscribe({
+        next: (response) => {
+          console.log('Respuesta exitosa:', response);
+          this.uploading = false;
+          this.progress = 100;
+          this.message = 'Archivo cargado con éxito';
+          this.messageType = 'success';
+          setTimeout(() => this.removeSelected(), 1200);
         },
-        error: async (err) => {
-          console.error('Error con FormData:', err);
-          
-          // Si falla con FormData, intentar con base64
-          if (err.status === 400 && err.error?.detail?.includes('seek')) {
-            console.log('Intentando envío alternativo con base64...');
-            try {
-              const base64Content = await this.convertFileToBase64(this.selectedFile!);
-              
-              const payload = {
-                filename: this.selectedFile!.name,
-                content: base64Content,
-                content_type: this.selectedFile!.type
-              };
-
-              const jsonHeaders = new HttpHeaders({
-                'Content-Type': 'application/json',
-                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-              });
-
-              this.http.post(this.uploadUrl, payload, { headers: jsonHeaders }).subscribe({
-                next: (response) => {
-                  this.uploading = false;
-                  this.progress = 100;
-                  this.message = 'Archivo cargado con éxito';
-                  this.messageType = 'success';
-                  setTimeout(() => this.removeSelected(), 1200);
-                },
-                error: (base64Error) => {
-                  this.uploading = false;
-                  this.progress = 0;
-                  this.messageType = 'error';
-                  const detail = base64Error?.error?.detail || base64Error?.message || 'Error desconocido';
-                  this.message = `Error al subir archivo: ${detail}`;
-                  console.error('Error con base64:', base64Error);
-                }
-              });
-            } catch (conversionError) {
-              this.uploading = false;
-              this.progress = 0;
-              this.messageType = 'error';
-              this.message = 'Error al procesar el archivo';
-              console.error('Error al convertir archivo:', conversionError);
-            }
-          } else {
-            this.uploading = false;
-            this.progress = 0;
-            this.messageType = 'error';
-            const detail = err?.error?.detail || err?.message || 'Error desconocido';
-            this.message = `Error al subir archivo: ${detail}`;
-          }
+        error: (err) => {
+          console.error('Error al subir archivo:', err);
+          this.uploading = false;
+          this.progress = 0;
+          this.messageType = 'error';
+          const detail = err?.error?.detail || err?.message || 'Error desconocido';
+          this.message = `Error al subir archivo: ${detail}`;
         }
       });
     } catch (error) {
+      console.error('Error al procesar archivo:', error);
       this.uploading = false;
       this.progress = 0;
       this.messageType = 'error';
-      this.message = 'Error al preparar el archivo para subir';
-      console.error('Error inesperado:', error);
+      this.message = 'Error al procesar el archivo';
     }
   }
 
