@@ -27,7 +27,7 @@
       </div>
       <div class="summary-item">
         <div class="label">Total de cargas</div>
-        <div class="value">{{ logs.length }}</div>
+        <div class="value">{{ totalUploads }}</div>
       </div>
     </section>
 
@@ -36,7 +36,10 @@
       <div class="loading-text">Cargando historial...</div>
     </div>
 
-    <div *ngIf="errorMessage && !loading" class="alert alert-danger">{{ errorMessage }}</div>
+    <div *ngIf="errorMessage && !loading" class="alert alert-danger">
+      <p>{{ errorMessage }}</p>
+      <button class="btn btn-primary" (click)="retry()" type="button">Reintentar</button>
+    </div>
 
     <div *ngIf="!loading && logs.length > 0" class="table-wrapper">
       <table class="log-table" role="table" aria-label="Tabla historial de cargas">

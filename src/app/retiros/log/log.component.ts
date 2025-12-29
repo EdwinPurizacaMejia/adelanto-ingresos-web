@@ -1,24 +1,46 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
+import { environment } from '../../../environments/environment';
 
 interface UploadLog {
   id: number;
+  uploadId: string;
   filename: string;
   uploadDate: string;
   uploadTime: string;
-  uploadedBy: string;
-  status: 'success' | 'error' | 'pending';
+  status: 'exitoso' | 'error' | 'pendiente';
   recordsProcessed: number;
   recordsError: number;
   errorMessage?: string;
+  processingTime?: number;
+}
+
+interface HistorialResponse {
+  ok: boolean;
+  username: string;
+  total_uploads: number;
+  historial: {
+    id: number;
+    upload_id: string;
+    filename: string;
+    upload_date: string;
+    upload_time: string;
+    status: string;
+    total_records: number;
+    successful_records: number;
+    failed_records: number;
+    error_message: string | null;
+    processing_time: number;
+  }[];
 }
 
 @Component({
   selector: 'app-log',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HttpClientModule],
   templateUrl: './log.component.html',
   styleUrls: ['./log.component.scss']
 })
@@ -27,11 +49,13 @@ export class LogComponent implements OnInit {
   loading = true;
   errorMessage: string | null = null;
   currentUsername: string | null = null;
+  totalUploads = 0;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  private historialUrl = `${environment.apiUrl}/retiros/disponibilidad/historial`;
+  private authService = inject(AuthService);
+  private http = inject(HttpClient);
+
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     this.currentUsername = this.authService.getUsername();
@@ -39,92 +63,89 @@ export class LogComponent implements OnInit {
   }
 
   loadLogs(): void {
-    // Datos de ejemplo - en producción consumiría una API
     this.loading = true;
-    setTimeout(() => {
-      this.logs = [
-        {
-          id: 1,
-          filename: 'empleados_lote_01.xlsx',
-          uploadDate: '2024-01-15',
-          uploadTime: '10:30:45',
-          uploadedBy: 'admin',
-          status: 'success',
-          recordsProcessed: 145,
-          recordsError: 0
-        },
-        {
-          id: 2,
-          filename: 'empleados_lote_02.xlsx',
-          uploadDate: '2024-01-15',
-          uploadTime: '11:45:20',
-          uploadedBy: 'admin',
-          status: 'success',
-          recordsProcessed: 98,
-          recordsError: 2,
-          errorMessage: 'Algunos registros tienen formato incorrecto'
-        },
-        {
-          id: 3,
-          filename: 'empleados_lote_03.xlsx',
-          uploadDate: '2024-01-14',
-          uploadTime: '14:12:30',
-          uploadedBy: 'admin',
-          status: 'error',
-          recordsProcessed: 0,
-          recordsError: 156,
-          errorMessage: 'Archivo corrupto o formato no soportado'
-        },
-        {
-          id: 4,
-          filename: 'empleados_lote_04.xlsx',
-          uploadDate: '2024-01-14',
-          uploadTime: '09:00:15',
-          uploadedBy: 'admin',
-          status: 'success',
-          recordsProcessed: 200,
-          recordsError: 0
-        },
-        {
-          id: 5,
-          filename: 'empleados_lote_05.xlsx',
-          uploadDate: '2024-01-13',
-          uploadTime: '16:25:00',
-          uploadedBy: 'admin',
-          status: 'pending',
-          recordsProcessed: 0,
-          recordsError: 0
+    this.errorMessage = null;
+
+    const token = this.authService.getToken();
+    const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+
+    console.log('Cargando historial desde:', this.historialUrl);
+
+    this.http.get<HistorialResponse>(this.historialUrl, { headers }).subscribe({
+      next: (response) => {
+        console.log('Historial recibido:', response);
+        
+        if (response.ok && response.historial) {
+          this.totalUploads = response.total_uploads;
+          this.currentUsername = response.username;
+          
+          // Mapear los datos de la API al formato del componente
+          this.logs = response.historial.map(item => ({
+            id: item.id,
+            uploadId: item.upload_id,
+            filename: item.filename,
+            uploadDate: item.upload_date,
+            uploadTime: item.upload_time,
+            status: this.normalizeStatus(item.status),
+            recordsProcessed: item.successful_records,
+            recordsError: item.failed_records,
+            errorMessage: item.error_message || undefined,
+            processingTime: item.processing_time
+          }));
+        } else {
+          this.logs = [];
+          this.totalUploads = 0;
         }
-      ];
-      this.loading = false;
-    }, 800);
+        
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar historial:', err);
+        this.loading = false;
+        this.errorMessage = 'Error al cargar el historial de cargas. Por favor, intente nuevamente.';
+        this.logs = [];
+        this.totalUploads = 0;
+      }
+    });
+  }
+
+  private normalizeStatus(status: string): 'exitoso' | 'error' | 'pendiente' {
+    const normalized = status.toLowerCase();
+    if (normalized === 'exitoso' || normalized === 'success') return 'exitoso';
+    if (normalized === 'error' || normalized === 'failed') return 'error';
+    if (normalized === 'pendiente' || normalized === 'pending') return 'pendiente';
+    return 'pendiente';
   }
 
   getStatusClass(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'success': 'status-success',
+      'exitoso': 'status-success',
       'error': 'status-error',
-      'pending': 'status-pending'
+      'pendiente': 'status-pending'
     };
     return statusMap[status] || 'status-pending';
   }
 
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'success': '✓ Exitoso',
+      'exitoso': '✓ Exitoso',
       'error': '✗ Error',
-      'pending': '⏳ Pendiente'
+      'pendiente': '⏳ Pendiente'
     };
     return statusMap[status] || status;
   }
 
   getStatusIcon(status: string): string {
     const iconMap: { [key: string]: string } = {
-      'success': '✓',
+      'exitoso': '✓',
       'error': '✗',
-      'pending': '⏳'
+      'pendiente': '⏳'
     };
     return iconMap[status] || '?';
+  }
+
+  retry(): void {
+    this.loadLogs();
   }
 
   goBack(): void {
