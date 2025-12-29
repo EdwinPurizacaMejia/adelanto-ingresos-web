@@ -94,16 +94,21 @@ export class CargaExcelComponent {
     if (!this.selectedFile || this.uploading) return;
 
     const formData = new FormData();
-    formData.append('file', this.selectedFile);
+    // Asegurar que el archivo se agregue correctamente con su nombre original
+    formData.append('file', this.selectedFile, this.selectedFile.name);
 
     // Use AuthService.getToken() (safe) instead of direct localStorage access
     const token = this.authService.getToken();
+    // No establecer Content-Type manualmente para FormData, el navegador lo hace automáticamente
     const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
 
     this.uploading = true;
     this.progress = 0;
     this.message = '';
     this.messageType = '';
+
+    console.log('Subiendo archivo:', this.selectedFile.name, 'Tamaño:', this.selectedFile.size, 'bytes');
+    console.log('URL de destino:', this.uploadUrl);
 
     this.http.post(this.uploadUrl, formData, {
       headers,
@@ -127,6 +132,7 @@ export class CargaExcelComponent {
         this.messageType = 'error';
         const detail = err?.error?.detail || err?.message || 'Error desconocido';
         this.message = `Error al subir archivo: ${detail}`;
+        console.error('Error completo:', err);
       }
     });
   }
