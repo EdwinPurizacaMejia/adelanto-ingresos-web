@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HttpEvent, HttpEventType, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-carga-excel',
@@ -18,7 +19,7 @@ export class CargaExcelComponent {
   progress = 0;
   isDragOver = false;
 
-  private uploadUrl = 'http://192.168.0.6:8000/retiros/disponibilidad/cargar';
+  private uploadUrl = `${environment.apiUrl}/retiros/disponibilidad/cargar`;
 
   // inject AuthService to avoid potential DI metadata/cycle issues
   private authService = inject(AuthService);
