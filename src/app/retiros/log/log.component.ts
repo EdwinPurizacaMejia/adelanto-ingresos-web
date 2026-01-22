@@ -158,18 +158,35 @@ downloadFile(upload_id: string): void {
   
   this.http.get(`${environment.apiUrl}/retiros/descargar/excel/${upload_id}`, { 
     headers,
-    responseType: 'blob'  // ← Esto ya te da un Blob
+    responseType: 'text'  // Recibir como texto (base64)
   }).subscribe({
-    next: (response: Blob) => {
-      // NO necesitas hacer new Blob([response]) porque response YA es un Blob
-      const url = window.URL.createObjectURL(response);  // ← Usar directamente
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `retiros_anotado_${upload_id}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+    next: (base64String: string) => {
+      try {
+        // Decodificar base64 a binario
+        const binaryString = atob(base64String);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        // Crear Blob con el tipo correcto para Excel
+        const blob = new Blob([bytes], { 
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+        
+        // Crear URL y descargar
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `disponibilidad_${upload_id}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error al decodificar el archivo:', error);
+        alert('Error al procesar el archivo descargado.');
+      }
     },
     error: (error) => {
       console.error('Error al descargar el archivo:', error);
