@@ -1,4 +1,8 @@
 
+# 0. Probar local
+ng build
+ng serve
+
 # 1. Primero haz build de producción
 ng build --configuration production --base-href "https://github.com/EdwinPurizacaMejia/adelanto-ingresos-web"
 

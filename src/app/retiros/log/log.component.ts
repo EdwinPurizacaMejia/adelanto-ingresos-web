@@ -151,4 +151,30 @@ export class LogComponent implements OnInit {
   goBack(): void {
     this.router.navigate(['/retiros/carga-excel']);
   }
+
+  downloadFile(upload_id: string): void {
+    const token = this.authService.getToken();
+    const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+    
+    this.http.get(`${environment.apiUrl}/retiros/descargar/excel/${upload_id}`, { 
+      headers,
+      responseType: 'blob' 
+    }).subscribe({
+      next: (response) => {
+        const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `descarga_${upload_id}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error al descargar el archivo:', error);
+        alert('Error al descargar el archivo. Por favor, intente nuevamente.');
+      }
+    });
+  }
 }

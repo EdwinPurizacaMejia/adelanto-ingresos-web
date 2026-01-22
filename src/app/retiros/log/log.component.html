@@ -53,6 +53,7 @@
             <th>Registros</th>
             <th>Errores</th>
             <th>Mensaje</th>
+            <th>Acciones</th> <!-- Nueva columna para acciones -->
           </tr>
         </thead>
         <tbody>
@@ -81,6 +82,16 @@
             <td class="cell-message">
               <span *ngIf="log.errorMessage" class="message" title="{{ log.errorMessage }}">{{ log.errorMessage }}</span>
               <span *ngIf="!log.errorMessage" class="muted">-</span>
+            </td>
+            <td class="cell-actions">
+              <!-- Botón de descarga -->
+              <button class="btn btn-primary btn-sm" (click)="downloadFile(log.uploadId)" title="Descargar archivo">
+                <!-- download SVG icon -->
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5 20h14M12 3v18M19 13l-7 7-7-7" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                </svg>
+                Descargar
+              </button>
             </td>
           </tr>
         </tbody>
